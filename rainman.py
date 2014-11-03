@@ -2,13 +2,13 @@ import os
 import json
 
 import forecastio
-from flask import Flask 
+from flask import Flask, abort
 
 API_KEY = os.environ.get('DARKSKY_API_KEY')
 if not API_KEY:
     raise ApiKeyNotFoundError('Please ensure the DARKSKY_API_KEY environment variable is set.')
-RAINMAIN_API_KEY = os.environ.get('RAINMAN_API_KEY')
-if not RAINMAIN_API_KEY:
+RAINMAN_API_KEY = os.environ.get('RAINMAN_API_KEY')
+if not RAINMAN_API_KEY:
     raise ApiKeyNotFoundError('No RAINMAN_API_KEY was configured')
 
 # TODO: In future, we will of course have these as route parameters
@@ -17,8 +17,10 @@ BROOKLYN_LNG = -73.93
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET'])
-def get_rain_data():
+@app.route('/<api_key>', methods=['GET'])
+def get_rain_data(api_key):
+    if api_key != RAINMAN_API_KEY:
+        abort(401)
     forecast = forecastio.load_forecast(API_KEY, BROOKLYN_LAT, BROOKLYN_LNG)
     byHour = forecast.hourly()
     data = [{'cloudCover': hourData.cloudCover, 'precipProbability': hourData.precipProbability} for hourData in byHour.data[0:24]]
