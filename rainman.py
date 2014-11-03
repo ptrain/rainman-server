@@ -27,7 +27,8 @@ def get_rain_data(api_key):
     return json.dumps(data, sort_keys=True, indent=4, separators=(',', ': '))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    rainman_debug = os.environ.get('RAINMAN_DEBUG', False)
+    app.run(debug=rainman_debug)
 
 
 class ApiKeyNotFoundError(Exception):
